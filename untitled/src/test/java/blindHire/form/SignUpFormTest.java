@@ -1,11 +1,14 @@
 package blindHire.form;
 
+import org.assertj.core.api.Assertions;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -19,29 +22,68 @@ public class SignUpFormTest {
 
     @BeforeClass
     public void setup() {
-
         System.setProperty("webdriver.chrome.driver",
                 "./src/test/resources/drivers/chromedriver.exe");
         driver = new ChromeDriver();
         int timeOutInSeconds = 10;
         webDriverWait = new WebDriverWait(driver, timeOutInSeconds);
-
     }
 
-    @Test
-    public void 이메일값_잘입력됐는지_검증() throws InterruptedException {
+@Test
+    public void all_Process_test() throws InterruptedException {
+
+        //회원가입 단계
+        joinProcess();
+
+        //온보딩 1단계
+        onBoardingStep1();
+
+        //온보딩 2단계
+        onBoardingStep2();
+
+        //온보딩 3단계
+        onBoardingStep3();
+
+        //온보딩 4단계
+        onBoardingStep4();
+
+        //온보딩 5단계
+        onBoardingStep5();
+
+        onBoardingStep6WithFile();
+        Thread.sleep(2000);
+
+        onBoardingStep7WithFile();
+
+        Thread.sleep(2000);
+        onBoardingStep9();
+
+
+
+        onBoardingFinish();
+
+        //driver.get("http://kr.dev1.dkshk.net:6085/");
+
+}
+
+
+    private void joinProcess() throws InterruptedException {
         //회원가입 폼 페이지 이동
         driver.get("http://kr.dev1.dkshk.net:7092/");
+
         WebElement Link = driver.findElement(By.linkText("회원가입"));
         Link.click();
+
         //set email value
         WebElement signupEmail1 = findForDuplicatedIdByTagName(driver, "signup-email1", "input");
         String emailValueNum = Integer.toString((int) (Math.random() * 1000000));
         String emailValue = "test-email-" + emailValueNum;
         signupEmail1.sendKeys(emailValue);
+
         //도메인 선택 영역 클릭
         WebElement domain = driver.findElement(By.cssSelector(".fieldset.fieldset_slct"));
         domain.click();
+
         //도메인 리스트 생성 후 첫번째 도메인 선택
         WebElement list = driver.findElement(By.cssSelector(".fieldset.fieldset_slct .auto")); //CLASS 선택시에 같은 레벨에 있는 클래스는 .(점)을 붙여서 씀. 하위접근은 띄어쓰기
         //서버통신필요 case....
@@ -75,7 +117,7 @@ public class SignUpFormTest {
         phoneNum.click();
 
         //TODO wating과 SELECTOR 추후 변경 필요
-        Thread.sleep(3000);
+        Thread.sleep(1000);
         WebElement phoneNumList = driver.findElement(By.cssSelector(".form_wrap.form_cc .fieldset .auto"));
 
         List<WebElement> phoneNumListOpen = phoneNumList.findElements(By.tagName("li"));
@@ -96,32 +138,41 @@ public class SignUpFormTest {
         WebElement signupSucButton = driver.findElement(By.name("button"));
         signupSucButton.click();
 
-        //확인 및 가입 완료하기 버튼 선택택
+        //확인 및 가입 완료하기 버튼 선택
         WebElement finshButton = driver.findElement(By.className("submit"));
+//        throw new WebDriverException("my error");
         finshButton.click();
-
-        //온보딩 1단계
-        onBoardingStep1();
-
-        //온보딩 2단계
-        onBoardingStep2();
-
-        //온보딩 3단계
-        onBoardingStep3();
-
-        //온보딩 4단계
-        onBoardingStep4();
-
-        //온보딩 5단계
-        onBoardingStep5();
-
-        //온보딩 6단계
-        //onBoardingStep6();
-        onBoardingStep6WithFile();
 
     }
 
-    private void onBoardingStep6() throws InterruptedException {
+    private void onBoardingStep9() {
+
+        webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".tit_area")));
+        WebElement nextSelectButton = driver.findElement(By.cssSelector(".btn_area_v2 .btn_postpone"));
+        nextSelectButton.click();
+
+    }
+
+    private void onBoardingFinish(){
+        webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".intro_area")));
+        WebElement finishButton = driver.findElement(By.cssSelector(".btn_apply"));
+        finishButton.click();
+
+    }
+
+    private void onBoardingStep7WithFile() throws InterruptedException {
+        webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".upload_area")));
+        //파일업로드 영역선택
+        Thread.sleep(2000);
+        WebElement upload_file2 = driver.findElement(By.cssSelector(".file_pre #file"));
+        upload_file2.sendKeys("C:\\Users\\SAMSUNG\\IdeaProjects\\untitled\\src\\test\\resources\\drivers\\asd.pdf");
+        //다음버튼 누르기
+        WebElement onboardingStep7NextButton = driver.findElement(By.className("btn_next"));
+        onboardingStep7NextButton.click();
+
+    }
+
+/*        private void onBoardingStep6() throws InterruptedException {
         webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".upload_area")));
         WebElement linkInputTab = driver.findElement(By.cssSelector(".cv_wrap.on_upload .link_area .tab"));
         linkInputTab.click();
@@ -131,14 +182,17 @@ public class SignUpFormTest {
         urlInput.sendKeys("https://www.google.com");
         WebElement onboardingStep6NextButton = driver.findElement(By.className("btn_next"));
         onboardingStep6NextButton.click();
-    }
+    }*/
 
-    private void onBoardingStep6WithFile() {
+    private void onBoardingStep6WithFile() throws InterruptedException {
         webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".upload_area")));
         //파일업로드 영역선택
         WebElement upload_file = driver.findElement(By.cssSelector(".file_pre #file"));
+        Thread.sleep(500);
         upload_file.sendKeys("C:\\Users\\SAMSUNG\\IdeaProjects\\untitled\\src\\test\\resources\\drivers\\asd.pdf");
         //다음버튼 누르기
+        WebElement onboardingStep6NextButton = webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.className("btn_next")));
+        onboardingStep6NextButton.click();
     }
 
 
@@ -204,25 +258,28 @@ public class SignUpFormTest {
         onBoardingStep3NextButton.click();
     }
 
-    private void onBoardingStep1() {
+    private void onBoardingStep1() throws InterruptedException {
         webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".dtl_area :nth-child(1) .form_wrap .flexselect .choices .choices__inner")));
         //직군 리스트 선택하기
         WebElement jobListElement = driver.findElement(By.cssSelector(".dtl_area :nth-child(1) .form_wrap .flexselect"));
         jobListElement.click();
 
-        WebElement jobElement = webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".dtl_area :nth-child(1) .form_wrap .flexselect .choices .choices__list.choices__list--dropdown .choices__list :nth-child(2)")));
+        WebElement jobElement = driver.findElement(By.cssSelector(".dtl_area :nth-child(1) .form_wrap .flexselect .choices .choices__list.choices__list--dropdown .choices__list :nth-child(2)"));
+        Thread.sleep(500);
         jobElement.click();
 
         //세부직군 리스트 선택 하기
         WebElement subjobListElement = driver.findElement(By.cssSelector(".dtl_area :nth-child(2) .form_wrap .flexselect"));
         subjobListElement.click();
         WebElement subjobElement = driver.findElement(By.cssSelector(".dtl_area :nth-child(2) .form_wrap .flexselect .choices .choices__list.choices__list--dropdown .choices__list :nth-child(2)"));
+        Thread.sleep(500);
         subjobElement.click();
 
         //총 경력 선택하기
         WebElement yoeListElement = driver.findElement(By.cssSelector(".dtl_area :nth-child(3) .form_wrap .flexselect"));
         yoeListElement.click();
         WebElement yoeElement = driver.findElement(By.cssSelector(".dtl_area :nth-child(3) .form_wrap .flexselect .choices .choices__list.choices__list--dropdown .choices__list :nth-child(2)"));
+        Thread.sleep(500);
         yoeElement.click();
         //다음 버튼 선택
         WebElement onboardingSetp1NextButton = driver.findElement(By.className("btn_next"));
@@ -249,7 +306,7 @@ public class SignUpFormTest {
         onboardingSetp2NextButton.click();
     }
 
-    @Test
+   /* @Test
     public void 대기시간_예() {
 
         int timeOutInSeconds = 20;
@@ -260,14 +317,7 @@ public class SignUpFormTest {
         WebElement domain = driver.findElement(By.cssSelector(".fieldset.fieldset_slct li"));
         WebElement webElement2 = webDriverWait.until(ExpectedConditions.visibilityOf(domain));
     }
-
-    @Test
-    public void 이메일값_자체_유효성_검증() {
-        // code add
-       // FSDFSF
-        //dev update 1
-    }
-
+    */
 
     private WebElement findForDuplicatedIdByTagName(WebDriver driver, String byId, String tagName) {
         List<WebElement> targetElements = driver.findElements(By.id(byId));
@@ -284,5 +334,6 @@ public class SignUpFormTest {
     @AfterMethod
     public void tearDown() {
         driver.quit();
-    }*/
+    }
+ */
 }
